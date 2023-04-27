@@ -1,2 +1,32 @@
 @import './common';
 @import './example';
+.search-form {
+    padding: 10px;
+    text-align: center;
+}
+body {
+    padding: 10px;
+}
+img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.photo-card {
+    width: 350px;
+    box-shadow: 0px 2px 1px rgba(46, 47, 66, 0.08),
+        0px 1px 1px rgba(46, 47, 66, 0.16),
+        0px 1px 6px rgba(46, 47, 66, 0.08);
+}
+
+.info {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
