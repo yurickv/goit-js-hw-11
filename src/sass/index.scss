@@ -37,3 +37,21 @@ img {
     width: 350px;
     height: 230px;
 }
+
+a:hover {
+    background: #fae3a4;
+}
+.button-up {
+    text-decoration: none;
+    display: none;
+    position: fixed;
+        top: 5px;
+        right: 5px;
+
+    background-color: rgb(252, 242, 231);
+    border: 2px ridge khaki;
+    border-radius: 5px;
+    padding: 5px;
+    margin-right: auto;
+    
+}

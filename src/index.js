@@ -14,7 +14,7 @@ const target = document.querySelector(".js-guard");
 let options = { rootMargin: "400px" };
 let observer = new IntersectionObserver(onLoad, options);
 const refs = {
-    newpage: 1,
+    newpage: 0,
     search: '',
     massive: 0,
     totalArrey: 0,
@@ -30,6 +30,9 @@ async function onSearch(evn) {
   try { 
       evn.preventDefault();
       clearGallery();  
+      buttonUp.style.display = 'none';
+      observer.unobserve(target);
+
       const axiosResult = await axiosSearch(refs.search)      
         if (!axiosResult) {
             throw new Error();
@@ -40,6 +43,7 @@ async function onSearch(evn) {
       createMarkup(axiosResult.hits);
       Notify.success(`Hooray, we found ${axiosResult.total} images`);
       observer.observe(target);
+      refs.newpage = 1;
     }
     
    catch (error) { Notify.failure('Sorry, there are no images matching your search query. Try something else!')}
@@ -99,6 +103,7 @@ function baletScroll() {
   });
 } 
 
+const buttonUp = document.querySelector('.button-up')
 function onLoad (entries, observer) {
      entries.forEach  ( async (element) => {
         
@@ -108,6 +113,8 @@ function onLoad (entries, observer) {
                 refs.newpage = 1;
                 refs.massive = 0;
                 refs.totalArrey = 0;
+                buttonUp.style.display = 'inline-block';
+                
                 Notify.warning('We are sorry, but you have reached the end of search results.');
                 return;
             }
@@ -119,6 +126,7 @@ function onLoad (entries, observer) {
                 // console.log( 'total', refs.totalArrey)
                 createMarkup(axiosResult.hits);
                 baletScroll();
+                buttonUp.style.display = 'inline-block';
             }
             catch (error) {
                 Notify.failure(`Sorry, we have a problem ${error}!`);
