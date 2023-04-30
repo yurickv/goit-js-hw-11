@@ -1,24 +1,17 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import axios from 'axios';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-const BASE_URL = "https://pixabay.com/api/";
-const MY_KEY = "35784631-ba5c8985f27dc4b55b0d6e182";
+import axiosSearch from './func-axios'
+import {createMarkup, clearGallery} from './func-murkup'
+import {target, observer, buttonUp, refs} from './func-scroll'
+
+const lightbox = new SimpleLightbox('.gallery__link');
+// let options = { rootMargin: "400px" };
+// let observer = new IntersectionObserver(onLoad, options);
 
 const inputForm = document.querySelector("#search-form");
-const gallery = document.querySelector('.gallery');
 inputForm.addEventListener('submit', onSearch);
-const target = document.querySelector(".js-guard");
-
-let options = { rootMargin: "400px" };
-let observer = new IntersectionObserver(onLoad, options);
-const refs = {
-    newpage: 0,
-    search: '',
-    massive: 0,
-    totalArrey: 0,
-};
 
 
 async function onSearch(evn) {
@@ -41,6 +34,7 @@ async function onSearch(evn) {
       refs.totalArrey = axiosResult.total;
 
       createMarkup(axiosResult.hits);
+      lightbox.refresh();
       Notify.success(`Hooray, we found ${axiosResult.total} images`);
       observer.observe(target);
       refs.newpage = 1;
@@ -50,88 +44,3 @@ async function onSearch(evn) {
             
 }
 
-async function axiosSearch(value, page=1) {
-    const response = await  axios.get(`${BASE_URL}/?key=${MY_KEY}&q=${value}
-       &image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
-    ); 
-    if (!response.data.hits.length) {
-        // throw new Error('Немає зображень');
-        return 
-    };
-    return response.data;
-};
-
-
-
-function createMarkup(array) {
-    const markup = array.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
-        `<div class="photo-card gallery__item">
-            <a class="gallery__link" href="${largeImageURL}">
-                <img
-                    class="gallery__image"
-                    src="${webformatURL}"
-                    alt="${tags}" loading="lazy"
-                />
-            </a>
-            <div class="info">
-                <p class="info-item"><b>Likes</b> ${likes}</p>
-                <p class="info-item"><b>Views</b>  ${views}</p>
-                <p class="info-item"><b>Comments</b> ${comments}</p>
-                <p class="info-item"><b>Downloads</b> ${downloads}</p>
-            </div>
-        </div>`
-    ).join('');
-    
-    gallery.insertAdjacentHTML('beforeend', markup);
-
-    const lightbox = new SimpleLightbox('.gallery__link');
-    lightbox.refresh();
-}
-
-function clearGallery() {
-  gallery.innerHTML = '';
-}
-
-function baletScroll() {
-  const { height: cardHeight } = document
-    .querySelector('.gallery')
-    .firstElementChild.getBoundingClientRect();
-
-  window.scrollBy({
-    top: cardHeight * 1,
-    behavior: 'smooth',
-  });
-} 
-
-const buttonUp = document.querySelector('.button-up')
-function onLoad (entries, observer) {
-     entries.forEach  ( async (element) => {
-        
-        if (element.isIntersecting) {
-            if (refs.massive < 40 || refs.totalArrey <=40 ) {
-                observer.unobserve(target);
-                refs.newpage = 1;
-                refs.massive = 0;
-                refs.totalArrey = 0;
-                buttonUp.style.display = 'inline-block';
-                
-                Notify.warning('We are sorry, but you have reached the end of search results.');
-                return;
-            }
-            refs.newpage += 1;
-            try {
-                const axiosResult = await axiosSearch(refs.search, refs.newpage)  
-                if (!axiosResult) { throw new Error(); }
-                refs.totalArrey -= axiosResult.hits.length;
-                // console.log( 'total', refs.totalArrey)
-                createMarkup(axiosResult.hits);
-                baletScroll();
-                buttonUp.style.display = 'inline-block';
-            }
-            catch (error) {
-                Notify.failure(`Sorry, we have a problem ${error}!`);
-                observer.unobserve(target);
-            }
-        } 
-    });
-}
